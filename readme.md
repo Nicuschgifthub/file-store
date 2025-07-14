@@ -25,4 +25,4 @@ npm install
 ![Folder](_images/inside-folder.png)
 
 Only the folder with .public is shown on the main page.
-![Current Setup]()
+![Current Setup](_images/folder-setup.png)
