@@ -23,3 +23,6 @@ npm install
 ![Main](_images/main-site.png)
 
 ![Folder](_images/inside-folder.png)
+
+Only the folder with .public is shown on the main page.
+![Current Setup]()
