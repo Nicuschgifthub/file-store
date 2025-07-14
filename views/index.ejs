@@ -1,0 +1,106 @@
+<html>
+
+<head>
+    <title>Nicusch File List<%= data.admin ? ' -Admin-' : '' %>
+    </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #363636;
+        }
+
+        tr:nth-child(even) {
+            background-color: #464646;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>
+            In Folder [<%= foldername %>] with
+                <% if (data.filesList.length===0) { %>
+                    no files
+                    <% } else if (data.filesList.length===1) { %>
+                        1 file
+                        <% } else { %>
+                            <%= data.filesList.length %> files
+                                <% } %>
+        </h1>
+        </h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Created</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.filesList.forEach(file=> { %>
+                    <tr>
+                        <td><a href="/download/<%= file.filelink %>">
+                                <%= file.name %>
+                            </a></td>
+                        <td>
+                            <%= file.size %>
+                        </td>
+                        <td>
+                            <%= file.created %>
+                        </td>
+                        <td>
+                            <%= file.type %>
+                        </td>
+                    </tr>
+                    <% }); %>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
