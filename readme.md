@@ -16,3 +16,10 @@ This is a minimal Node.js webserver that functions as a simple **file explorer**
 
 ```bash
 npm install
+```
+
+## Images
+
+![Main](_images/main-site.png)
+
+![Folder](_images/inside-folder.png)
