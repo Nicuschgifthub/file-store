@@ -1,6 +1,6 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5555;
@@ -36,46 +36,15 @@ const findFoldersWithPublicFile = () => {
   return foldersWithPublicFile;
 }
 
-app.get('/', (req, res) => {
-  const publicFolders = findFoldersWithPublicFile();
-  console.log(publicFolders)
-  res.render('info', { public: publicFolders });
-})
+app.get('/download/:fileid', (req, res) => {
+  const filePathSimple = getFileLink(req.params.fileid)
 
-app.get('/:folder', (req, res) => {
-  const folderName = req.params.folder;
-  const folderPath = path.join(filesDirectory, folderName);
-
-  if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
-    return res.render('404');
+  if (filePathSimple == undefined) {
+    res.redirect('/404-no-link');
+    return;
   }
 
-  fs.readdir(folderPath, (err, files) => {
-    if (err) {
-      console.error('Error reading directory:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-
-    files = files.filter(element => element !== '.public');
-
-    const filesList = files.map(file => {
-      const stats = fs.statSync(path.join(folderPath, file));
-      return {
-        filelink: newFileLink(path.join(folderName, file)),
-        name: file,
-        size: formatBytes(stats.size),
-        created: formatDate(stats.birthtime),
-        modified: formatDate(stats.mtime),
-        type: getFileType(file)
-      };
-    });
-
-    res.render('index', { data: { filesList }, foldername: folderName });
-  });
-});
-
-app.get('/download/:fileid', (req, res) => {
-  const filePath = path.join(filesDirectory, getFileLink(req.params.fileid));
+  const filePath = path.join(filesDirectory, filePathSimple);
 
   if (!fs.existsSync(filePath)) {
     res.redirect('/404-no-link');
@@ -83,6 +52,74 @@ app.get('/download/:fileid', (req, res) => {
   }
 
   res.download(filePath);
+});
+
+app.get('/', (req, res) => {
+  const publicFolders = findFoldersWithPublicFile().map(name => ({
+    name: '📁' + name,
+    type: 'folder',
+    size: '-',
+    created: '-',
+    modified: '-',
+    filelink: `/${name}`
+  }));
+
+  res.render('index', {
+    data: { filesList: publicFolders },
+    foldername: '/',
+    isRoot: true
+  });
+});
+
+
+app.get('/*', (req, res) => {
+  const requestedPath = req.params[0] || '';
+  const folderPath = path.resolve(filesDirectory, requestedPath);
+
+  if (!folderPath.startsWith(filesDirectory)) {
+    return res.status(403).send('Access Denied');
+  }
+
+  if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
+    return res.render('404');
+  }
+
+  const relativePath = path.relative(filesDirectory, folderPath);
+  const parentPath = relativePath ? `/${path.dirname(relativePath)}` : '/';
+
+  const items = fs.readdirSync(folderPath, { withFileTypes: true })
+    .filter(item => item.name !== '.public')
+    .map(item => {
+      const fullPath = path.join(folderPath, item.name);
+      const stats = fs.statSync(fullPath);
+
+      if (item.isDirectory()) {
+        return {
+          name: '📁' + item.name,
+          type: 'folder',
+          size: '-',
+          created: formatDate(stats.birthtime),
+          modified: formatDate(stats.mtime),
+          filelink: path.join('/', relativePath, item.name)
+        };
+      } else {
+        return {
+          name: item.name,
+          type: getFileType(item.name),
+          size: formatBytes(stats.size),
+          created: formatDate(stats.birthtime),
+          modified: formatDate(stats.mtime),
+          filelink: `/download/${newFileLink(path.join(relativePath, item.name))}`
+        };
+      }
+    });
+
+  res.render('index', {
+    data: { filesList: items },
+    foldername: relativePath || '/',
+    isRoot: !relativePath,
+    parentPath
+  });
 });
 
 app.get('/404-no-link', (req, res) => {

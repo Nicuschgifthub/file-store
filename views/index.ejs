@@ -61,45 +61,63 @@
 
 <body>
     <div class="container">
-        <h1>
-            In Folder [<%= foldername %>] with
-                <% if (data.filesList.length===0) { %>
-                    no files
-                    <% } else if (data.filesList.length===1) { %>
-                        1 file
-                        <% } else { %>
-                            <%= data.filesList.length %> files
-                                <% } %>
-        </h1>
-        </h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Size</th>
-                    <th>Created</th>
-                    <th>Type</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% data.filesList.forEach(file=> { %>
-                    <tr>
-                        <td><a href="/download/<%= file.filelink %>">
-                                <%= file.name %>
-                            </a></td>
-                        <td>
-                            <%= file.size %>
-                        </td>
-                        <td>
-                            <%= file.created %>
-                        </td>
-                        <td>
-                            <%= file.type %>
-                        </td>
-                    </tr>
-                    <% }); %>
-            </tbody>
-        </table>
+        <% if (!isRoot) { %>
+            <a href="<%= parentPath %>"
+                style="color:white; background:#007bff; padding:5px 10px; border-radius:5px; text-decoration:none;">
+                ← Back
+            </a>
+            <br><br>
+            <% } %>
+                <h1>
+                    In Folder [<%= foldername %>] with
+                        <% if (data.filesList.length===0) { %>
+                            no files
+                            <% } else if (data.filesList.length===1) { %>
+                                1 item
+                                <% } else { %>
+                                    <%= data.filesList.length %> items
+                                        <% } %>
+                </h1>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Created</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% data.filesList.forEach(item=> { %>
+                            <tr>
+                                <% if (item.type==='folder' ) { %>
+                                    <td><a href="<%= item.filelink %>"><strong>
+                                                <%= item.name %>
+                                            </strong></a></td>
+                                    <td>-</td>
+                                    <td>
+                                        <%= item.created %>
+                                    </td>
+                                    <td>Folder</td>
+                                    <% } else { %>
+                                        <td><a href="<%= item.filelink %>">
+                                                <%= item.name %>
+                                            </a></td>
+                                        <td>
+                                            <%= item.size %>
+                                        </td>
+                                        <td>
+                                            <%= item.created %>
+                                        </td>
+                                        <td>
+                                            <%= item.type %>
+                                        </td>
+                                        <% } %>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
     </div>
 </body>
 
