@@ -85,6 +85,7 @@
                             <th>Name</th>
                             <th>Size</th>
                             <th>Created</th>
+                            <th>Modified</th>
                             <th>Type</th>
                         </tr>
                     </thead>
@@ -95,9 +96,14 @@
                                     <td><a href="<%= item.filelink %>"><strong>
                                                 <%= item.name %>
                                             </strong></a></td>
-                                    <td>-</td>
+                                    <td>
+                                        <%= item.size %>
+                                    </td>
                                     <td>
                                         <%= item.created %>
+                                    </td>
+                                    <td>
+                                        <%= item.modified %>
                                     </td>
                                     <td>Folder</td>
                                     <% } else { %>
@@ -109,6 +115,9 @@
                                         </td>
                                         <td>
                                             <%= item.created %>
+                                        </td>
+                                        <td>
+                                            <%= item.modified %>
                                         </td>
                                         <td>
                                             <%= item.type %>

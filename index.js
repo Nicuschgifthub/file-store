@@ -54,15 +54,38 @@ app.get('/download/:fileid', (req, res) => {
   res.download(filePath);
 });
 
+function getFolderSize(folderPath) {
+  let totalSize = 0;
+
+  const items = fs.readdirSync(folderPath, { withFileTypes: true });
+  for (const item of items) {
+    const fullPath = path.join(folderPath, item.name);
+    const stats = fs.statSync(fullPath);
+
+    if (item.isDirectory()) {
+      totalSize += getFolderSize(fullPath); // recursion for subfolders
+    } else {
+      totalSize += stats.size;
+    }
+  }
+
+  return totalSize;
+}
+
 app.get('/', (req, res) => {
-  const publicFolders = findFoldersWithPublicFile().map(name => ({
-    name: '📁' + name,
-    type: 'folder',
-    size: '-',
-    created: '-',
-    modified: '-',
-    filelink: `/${name}`
-  }));
+  const publicFolders = findFoldersWithPublicFile().map(name => {
+    const fullPath = path.resolve(filesDirectory, name);
+    const stats = fs.statSync(fullPath);
+
+    return {
+      name: '📁' + name,
+      type: 'folder',
+      size: formatBytes(getFolderSize(fullPath)),
+      created: formatDate(stats.birthtime),
+      modified: formatDate(stats.mtime),
+      filelink: `/${name}`
+    };
+  });
 
   res.render('index', {
     data: { filesList: publicFolders },
@@ -70,6 +93,7 @@ app.get('/', (req, res) => {
     isRoot: true
   });
 });
+
 
 
 app.get('/*', (req, res) => {
@@ -97,7 +121,7 @@ app.get('/*', (req, res) => {
         return {
           name: '📁' + item.name,
           type: 'folder',
-          size: '-',
+          size: formatBytes(getFolderSize(fullPath)), // now shows folder size
           created: formatDate(stats.birthtime),
           modified: formatDate(stats.mtime),
           filelink: path.join('/', relativePath, item.name)
